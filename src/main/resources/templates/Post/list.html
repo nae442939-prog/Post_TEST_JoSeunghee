@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 목록</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 0 16px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: center; }
+        td.title { text-align: left; }
+        .top { display: flex; justify-content: space-between; align-items: center; }
+        a.btn { padding: 6px 14px; background: #2f6fed; color: #fff; text-decoration: none; border-radius: 4px; }
+        .paging { margin-top: 20px; text-align: center; }
+        .paging a, .paging strong { display: inline-block; margin: 0 3px; padding: 4px 10px; border: 1px solid #ddd; border-radius: 4px; text-decoration: none; color: #333; }
+        .paging strong { background: #2f6fed; border-color: #2f6fed; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="top">
+        <h1>게시글 목록</h1>
+        <!-- 게시글 쓰기로 이동 -->
+        <a class="btn" th:href="@{/Post/insert}">글쓰기</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>조회수</th>
+                <th>작성일</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 게시글이 없을 때 -->
+            <tr th:if="${#lists.isEmpty(posts)}">
+                <td colspan="5">등록된 게시글이 없습니다.</td>
+            </tr>
+
+            <!-- 게시글 목록 출력 -->
+            <tr th:each="post : ${posts}">
+                <td th:text="${post.id}">1</td>
+                <td class="title">
+                    <!-- 제목 클릭 시 /Post/read/(글번호) 로 이동 -->
+                    <a th:href="@{/Post/read/{id}(id=${post.id})}" th:text="${post.title}">제목</a>
+                </td>
+                <td th:text="${post.writer}">작성자</td>
+                <td th:text="${post.viewCount}">0</td>
+                <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}">2026-01-01</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- [문항5 추가] 페이지 번호 : [이전] 1 2 3 4 5 [다음] -->
+    <div class="paging" th:if="${page != null and page.totalPages > 0}">
+        <a th:if="${page.prev}" th:href="@{/Post/list(page=${page.startPage - 1})}">이전</a>
+
+        <th:block th:each="num : ${#numbers.sequence(page.startPage, page.endPage)}">
+            <strong th:if="${num == page.page}" th:text="${num}">1</strong>
+            <a th:unless="${num == page.page}" th:href="@{/Post/list(page=${num})}" th:text="${num}">2</a>
+        </th:block>
+
+        <a th:if="${page.next}" th:href="@{/Post/list(page=${page.endPage + 1})}">다음</a>
+    </div>
+
+    <p><a th:href="@{/}">메인으로</a></p>
+</body>
+</html>
