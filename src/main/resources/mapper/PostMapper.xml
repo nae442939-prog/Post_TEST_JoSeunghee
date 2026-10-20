@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+    게시판 SQL 매퍼 (PostMapper.xml)
+    - 위치 : src/main/resources/mapper/PostMapper.xml
+    - 연결 : com.example.board.mapper.PostMapper (인터페이스)
+    - DTO  : com.example.board.dto.Post
+    - 테이블 생성 SQL : src/main/resources/schema.sql
+-->
+<mapper namespace="com.example.board.mapper.PostMapper">
+
+    <!-- DB 컬럼(snake_case) ↔ DTO 필드(camelCase) 매핑 -->
+    <resultMap id="postResultMap" type="com.example.board.dto.Post">
+        <id     property="id"        column="id"/>
+        <result property="title"     column="title"/>
+        <result property="content"   column="content"/>
+        <result property="writer"    column="writer"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- 1. 게시글 등록 : 저장 후 생성된 id를 DTO의 id 필드에 담아 줌 -->
+    <insert id="insertPost"
+            parameterType="com.example.board.dto.Post"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO post (title, content, writer, view_count, created_at, updated_at)
+        VALUES (#{title}, #{content}, #{writer}, 0, NOW(), NOW())
+    </insert>
+
+    <!-- 2. 게시글 목록 : 최신 글이 위로 오도록 정렬 -->
+    <select id="selectPostList" resultMap="postResultMap">
+        SELECT id, title, writer, view_count, created_at, updated_at
+        FROM post
+        ORDER BY id DESC
+    </select>
+
+    <!-- [문항5 추가] 2-1. 게시글 목록 - 페이징 : offset 위치부터 size 개만 조회 -->
+    <select id="selectPostListPaging"
+            parameterType="com.example.board.dto.Page"
+            resultMap="postResultMap">
+        SELECT id, title, writer, view_count, created_at, updated_at
+        FROM post
+        ORDER BY id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!-- [문항5 추가] 2-2. 전체 게시글 수 -->
+    <select id="countPost" resultType="int">
+        SELECT COUNT(*)
+        FROM post
+    </select>
+
+    <!-- 3. 게시글 상세 조회 -->
+    <select id="selectPostById" parameterType="long" resultMap="postResultMap">
+        SELECT id, title, content, writer, view_count, created_at, updated_at
+        FROM post
+        WHERE id = #{id}
+    </select>
+
+    <!-- 3-1. 조회수 증가 (상세 조회 시 함께 호출) -->
+    <update id="updateViewCount" parameterType="long">
+        UPDATE post
+        SET view_count = view_count + 1
+        WHERE id = #{id}
+    </update>
+
+    <!-- 4. 게시글 수정 : 제목, 내용, 수정일 변경 -->
+    <update id="updatePost" parameterType="com.example.board.dto.Post">
+        UPDATE post
+        SET title      = #{title},
+            content    = #{content},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 5. 게시글 삭제 -->
+    <delete id="deletePost" parameterType="long">
+        DELETE FROM post
+        WHERE id = #{id}
+    </delete>
+
+</mapper>
