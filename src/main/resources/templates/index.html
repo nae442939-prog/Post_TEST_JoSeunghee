@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시판 메인</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 60px auto; padding: 0 16px; text-align: center; }
+        a.btn { display: inline-block; padding: 10px 24px; background: #2f6fed; color: #fff; text-decoration: none; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>게시판</h1>
+    <p>스프링 부트 MVC 게시판입니다.</p>
+
+    <!-- 게시글 목록으로 이동 -->
+    <a class="btn" th:href="@{/Post/list}">게시글 목록</a>
+</body>
+</html>
